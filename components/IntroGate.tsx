@@ -8,7 +8,7 @@ interface Props {
 
 export const IntroGate: React.FC<Props> = ({ onEnter }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black text-vintage-cream">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black text-vintage-cream touch-manipulation">
         
         {/* Left Curtain */}
         <motion.div 
@@ -30,7 +30,7 @@ export const IntroGate: React.FC<Props> = ({ onEnter }) => {
 
         {/* Center Content (stays and scales out) */}
         <motion.div 
-            className="relative z-30 flex flex-col items-center cursor-pointer group"
+            className="relative z-30 flex flex-col items-center cursor-pointer group px-4"
             onClick={onEnter}
             exit={{ opacity: 0, scale: 1.5, filter: 'blur(10px)', transition: { duration: 1 } }}
         >
@@ -39,7 +39,7 @@ export const IntroGate: React.FC<Props> = ({ onEnter }) => {
                     boxShadow: ['0 0 20px rgba(212, 175, 55, 0.2)', '0 0 60px rgba(212, 175, 55, 0.6)', '0 0 20px rgba(212, 175, 55, 0.2)']
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="w-64 h-64 rounded-full border border-vintage-gold/30 flex items-center justify-center bg-black/40 backdrop-blur-sm relative overflow-hidden"
+                className="w-48 h-48 sm:w-64 sm:h-64 rounded-full border border-vintage-gold/30 flex items-center justify-center bg-black/40 backdrop-blur-sm relative overflow-hidden"
             >
                  <img src={ASSETS.BG_PHOTO_BASE} className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale mix-blend-overlay" alt="texture" />
                  
@@ -48,7 +48,7 @@ export const IntroGate: React.FC<Props> = ({ onEnter }) => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="font-heading text-xs tracking-[0.4em] text-vintage-gold mb-2"
+                        className="font-heading text-[10px] sm:text-xs tracking-[0.4em] text-vintage-gold mb-2"
                     >
                         EST. 2026
                     </motion.p>
@@ -56,7 +56,7 @@ export const IntroGate: React.FC<Props> = ({ onEnter }) => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.8, duration: 1 }}
-                        className="font-script text-6xl text-vintage-cream"
+                        className="font-script text-4xl sm:text-6xl text-vintage-cream"
                     >
                         Enter
                     </motion.h1>
@@ -67,9 +67,9 @@ export const IntroGate: React.FC<Props> = ({ onEnter }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
                 transition={{ delay: 1.5 }}
-                className="mt-8 font-heading text-xs tracking-widest text-vintage-gold/60 uppercase"
+                className="mt-8 font-heading text-[10px] sm:text-xs tracking-widest text-vintage-gold/60 uppercase"
             >
-                Touch to Begin
+                Tap to Begin
             </motion.p>
         </motion.div>
     </div>

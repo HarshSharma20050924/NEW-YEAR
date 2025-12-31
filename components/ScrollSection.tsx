@@ -24,7 +24,7 @@ export const ScrollSection: React.FC<Props> = ({ children, delay = 0 }) => {
     <motion.div
       ref={ref}
       style={{ y, opacity, scale, rotateX, rotateZ }}
-      className="perspective-1000 my-32 w-full flex justify-center will-change-transform"
+      className="perspective-1000 my-16 sm:my-32 w-full flex justify-center will-change-transform"
     >
       {children}
     </motion.div>

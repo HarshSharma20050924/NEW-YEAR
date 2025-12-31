@@ -77,6 +77,7 @@ export default function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingText, setLoadingText] = useState("Rewinding 2025...");
   
   // Audio State
   const [audioDuration, setAudioDuration] = useState(0);
@@ -88,7 +89,26 @@ export default function App() {
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // 1. Check URL for ID (Cloud) or Params (Lite) and Load Data
+  // 1. Loading Text Animation
+  useEffect(() => {
+    if (isLoading) {
+        const phrases = [
+            "Rewinding 2025...",
+            "Collecting Precious Moments...",
+            "Polishing Memories...",
+            "Designing Your 2026...",
+            "Almost There..."
+        ];
+        let i = 0;
+        const interval = setInterval(() => {
+            i = (i + 1) % phrases.length;
+            setLoadingText(phrases[i]);
+        }, 1500);
+        return () => clearInterval(interval);
+    }
+  }, [isLoading]);
+
+  // 2. Check URL for ID (Cloud) or Params (Lite) and Load Data
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const wishId = params.get('id');
@@ -122,11 +142,12 @@ export default function App() {
                 setWishData(prev => ({ ...prev, ...parsed }));
             } catch (e) {}
         }
-        setIsLoading(false);
+        // Artificial delay if local to show off the animation briefly, or instant
+        setTimeout(() => setIsLoading(false), 2000); 
     }
   }, []);
 
-  // 2. Audio Logic
+  // 3. Audio Logic
   useEffect(() => {
     if (audioRef.current) {
         audioRef.current.load();
@@ -230,11 +251,25 @@ export default function App() {
 
   if (isLoading) {
       return (
-          <div className="fixed inset-0 bg-vintage-dark flex items-center justify-center z-[100]">
-              <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-vintage-gold/30 border-t-vintage-gold rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="font-heading text-vintage-gold tracking-widest text-sm animate-pulse">LOADING...</p>
+          <div className="fixed inset-0 bg-vintage-dark flex flex-col items-center justify-center z-[100] p-4">
+              <div className="relative">
+                  <div className="w-24 h-24 border-4 border-vintage-gold/20 border-t-vintage-gold rounded-full animate-spin mb-8"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-vintage-gold/50 text-xs font-heading">2025</span>
+                  </div>
               </div>
+              
+              <AnimatePresence mode="wait">
+                <motion.p 
+                    key={loadingText}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="font-heading text-vintage-gold tracking-widest text-sm sm:text-lg text-center uppercase"
+                >
+                    {loadingText}
+                </motion.p>
+              </AnimatePresence>
           </div>
       )
   }
@@ -259,7 +294,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main className={`min-h-screen relative transition-opacity duration-1000 ${hasEntered ? 'opacity-100' : 'opacity-0'}`}>
+      <main className={`min-h-screen relative transition-opacity duration-1000 ${hasEntered ? 'opacity-100' : 'opacity-0'} overflow-x-hidden`}>
         
         {/* Particles */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -293,28 +328,30 @@ export default function App() {
               exit={{ opacity: 0, y: '100%' }}
               className="fixed inset-0 z-50 bg-vintage-dark/98 backdrop-blur-xl overflow-y-auto"
             >
-              <div className="max-w-5xl mx-auto p-6 pb-32">
+              <div className="max-w-5xl mx-auto p-4 md:p-6 pb-32">
                  
                  {/* Header */}
                  <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-vintage-gold/20 pb-4 sticky top-0 bg-vintage-dark/95 z-10 pt-4 gap-4">
-                    <h2 className="font-heading text-3xl text-vintage-gold">Creator Studio</h2>
+                    <h2 className="font-heading text-2xl md:text-3xl text-vintage-gold">Creator Studio</h2>
                     
-                    <div className="flex flex-wrap gap-4 items-center justify-center">
+                    <div className="flex flex-wrap gap-2 md:gap-4 items-center justify-center">
                         {shareLink ? (
-                             <div className={`flex items-center border rounded px-4 py-2 gap-4 animate-fadeIn bg-green-900/30 border-green-500/50`}>
+                             <div className={`flex flex-col sm:flex-row items-center border rounded px-4 py-2 gap-2 sm:gap-4 animate-fadeIn bg-green-900/30 border-green-500/50`}>
                                 <span className={`text-green-400 text-xs font-heading tracking-widest uppercase flex items-center gap-1`}>
                                     <Check size={14}/> 
-                                    Saved to DB!
+                                    Saved!
                                 </span>
-                                <button onClick={handleCopyLink} className="flex items-center gap-2 text-white hover:text-green-300 transition-colors text-xs font-bold uppercase bg-white/10 px-3 py-1 rounded">
-                                    {copySuccess ? <Check size={14}/> : <LinkIcon size={14}/>} {copySuccess ? 'Copied' : 'Copy'}
-                                </button>
-                                <button 
-                                    onClick={() => setShareLink(null)} 
-                                    className="ml-2 text-white/50 hover:text-white text-xs underline"
-                                >
-                                    New
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={handleCopyLink} className="flex items-center gap-2 text-white hover:text-green-300 transition-colors text-xs font-bold uppercase bg-white/10 px-3 py-1 rounded">
+                                        {copySuccess ? <Check size={14}/> : <LinkIcon size={14}/>} {copySuccess ? 'Copied' : 'Copy'}
+                                    </button>
+                                    <button 
+                                        onClick={() => setShareLink(null)} 
+                                        className="ml-2 text-white/50 hover:text-white text-xs underline"
+                                    >
+                                        New
+                                    </button>
+                                </div>
                              </div>
                         ) : (
                             <button 
@@ -342,7 +379,7 @@ export default function App() {
                  )}
 
                  {/* Editor Grid */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                     {/* Left Col: Content */}
                     <div className="space-y-8">
                         <h3 className="font-heading text-xl text-vintage-cream mb-4 flex items-center gap-2"><PenToolIcon /> Content</h3>
@@ -495,29 +532,29 @@ export default function App() {
 
         {/* --- SCROLL CONTENT --- */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pb-32">
-           <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 mb-24 relative overflow-hidden">
+           <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 mb-12 sm:mb-24 relative overflow-hidden">
                 <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: hasEntered ? 0.4 : 0 }}
                     transition={{ duration: 2, delay: 1 }}
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 >
-                    <div className="w-[800px] h-[800px] bg-vintage-gold/10 rounded-full blur-[100px]" />
+                    <div className="w-[300px] h-[300px] sm:w-[800px] sm:h-[800px] bg-vintage-gold/10 rounded-full blur-[60px] sm:blur-[100px]" />
                 </motion.div>
 
                 <motion.div 
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: hasEntered ? 1 : 0 }}
                     transition={{ duration: 1.5, delay: 0.5, ease: "circOut" }}
-                    className="w-32 h-[2px] bg-vintage-gold mx-auto mb-8 relative z-10"
+                    className="w-16 sm:w-32 h-[2px] bg-vintage-gold mx-auto mb-4 sm:mb-8 relative z-10"
                 />
                 
-                <div className="overflow-hidden relative z-10">
+                <div className="overflow-hidden relative z-10 text-center">
                     <motion.h1 
                         initial={{ y: 200, opacity: 0, rotate: 5 }}
                         animate={{ y: hasEntered ? 0 : 200, opacity: hasEntered ? 1 : 0, rotate: hasEntered ? 0 : 5 }}
                         transition={{ duration: 1.5, delay: 0.8, ease: "easeOut" }}
-                        className="font-heading text-8xl sm:text-9xl lg:text-[12rem] text-vintage-cream mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] leading-none tracking-tighter"
+                        className="font-heading text-6xl sm:text-9xl lg:text-[12rem] text-vintage-cream mb-4 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] leading-none tracking-tighter"
                     >
                         2026
                     </motion.h1>
@@ -525,9 +562,9 @@ export default function App() {
 
                 <motion.p 
                     initial={{ opacity: 0, letterSpacing: "0em" }}
-                    animate={{ opacity: hasEntered ? 1 : 0, letterSpacing: hasEntered ? "0.3em" : "0em" }}
+                    animate={{ opacity: hasEntered ? 1 : 0, letterSpacing: hasEntered ? "0.2em" : "0em" }}
                     transition={{ duration: 2, delay: 1.5 }}
-                    className="font-heading text-xl sm:text-2xl text-vintage-gold uppercase"
+                    className="font-heading text-sm sm:text-xl lg:text-2xl text-vintage-gold uppercase text-center"
                 >
                     The Golden Chapter
                 </motion.p>
@@ -542,8 +579,8 @@ export default function App() {
              />
           </ScrollSection>
 
-          <div className="h-48 flex items-center justify-center my-12 opacity-40">
-               <img src="https://cdn-icons-png.flaticon.com/512/44/44654.png" className="w-8 h-8 opacity-50 invert" alt="separator" />
+          <div className="h-24 sm:h-48 flex items-center justify-center my-8 sm:my-12 opacity-40">
+               <img src="https://cdn-icons-png.flaticon.com/512/44/44654.png" className="w-6 h-6 sm:w-8 sm:h-8 opacity-50 invert" alt="separator" />
           </div>
 
           <ScrollSection>
@@ -559,7 +596,7 @@ export default function App() {
         <footer className="w-full py-8 text-center fixed bottom-0 left-0 z-20 pointer-events-none mix-blend-difference">
            <button 
                 onClick={() => setIsEditing(true)} 
-                className="pointer-events-auto font-heading text-xs tracking-[0.5em] text-vintage-gold/30 hover:text-vintage-gold/80 transition-all duration-700 uppercase"
+                className="pointer-events-auto font-heading text-[10px] sm:text-xs tracking-[0.3em] sm:tracking-[0.5em] text-vintage-gold/30 hover:text-vintage-gold/80 transition-all duration-700 uppercase"
             >
                 2026
             </button>
