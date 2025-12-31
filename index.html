@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vintage New Year Wishes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&family=Italianno&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'vintage-cream': '#f4e4bc',
+              'vintage-gold': '#d4af37',
+              'vintage-brown': '#5d4037',
+              'vintage-dark': '#2c1810',
+              'vintage-ink': '#1a0f0d',
+              'paper-texture': '#fdfbf7',
+            },
+            fontFamily: {
+              heading: ['Cinzel', 'serif'],
+              script: ['Great Vibes', 'cursive'],
+              handwriting: ['Italianno', 'cursive'],
+              body: ['Playfair Display', 'serif'],
+              text: ['Lato', 'sans-serif'],
+            },
+            backgroundImage: {
+              'noise': "url('https://grainy-gradients.vercel.app/noise.svg')",
+            },
+            boxShadow: {
+              'paper': '2px 4px 15px rgba(0,0,0,0.25), 10px 10px 30px rgba(0,0,0,0.15)',
+              'deep': '0 20px 50px rgba(0,0,0,0.5)',
+              'inner-glow': 'inset 0 0 50px rgba(212, 175, 55, 0.1)',
+            },
+            animation: {
+              'float': 'float 10s ease-in-out infinite',
+              'shine': 'shine 2s linear infinite',
+              'pulse-gold': 'pulse-gold 2s infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              shine: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
+              },
+              'pulse-gold': {
+                '0%, 100%': { boxShadow: '0 0 0 0 rgba(212, 175, 55, 0.4)' },
+                '50%': { boxShadow: '0 0 0 10px rgba(212, 175, 55, 0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #2c1810;
+        /* Using a darker, grungier parchment texture for the global background */
+        background-image: url("https://img.freepik.com/free-photo/old-paper-texture-background_118047-1365.jpg?w=1380&t=st=1708800000~exp=1708800600~hmac=fake_token");
+        background-blend-mode: overlay;
+        background-size: cover;
+        background-attachment: fixed;
+        color: #f4e4bc;
+        overflow-x: hidden;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1a0f0d;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d4af37;
+        border-radius: 3px;
+      }
+      .blend-multiply {
+        mix-blend-mode: multiply;
+      }
+      .perspective-1000 {
+        perspective: 1200px;
+      }
+      .backface-hidden {
+        backface-visibility: hidden;
+      }
+      .transform-style-3d {
+        transform-style: preserve-3d;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "framer-motion": "https://esm.sh/framer-motion@^12.23.26",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
