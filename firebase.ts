@@ -1,63 +1,55 @@
 import { createClient } from '@supabase/supabase-js';
 
-// --- SUPABASE STORAGE IMPLEMENTATION ---
-// Configured to use Environment Variables for secure and consistent access.
-// Ensure SUPABASE_URL and SUPABASE_KEY are set in your deployment environment (e.g., Vercel).
-
-const supabaseUrl = process.env.SUPABASE_URL || 'https://gfnbojmshrfezvsbszeu.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmbmJvam1zaHJmZXp2c2JzemV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxNzE3MzYsImV4cCI6MjA4Mjc0NzczNn0.lG7E1uO_XL95hxeLQbg7eG8qOz_0AKt8guguTJWoVgg';
-
-// Initialize the client once
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-export const saveWishToCloud = async (data: any) => {
-  if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Configuration Error: Missing Supabase Environment Variables.");
+// Helper to read env in Vite or CRA
+const getEnvVar = (key: string) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+    return import.meta.env[key];
   }
-
-  try {
-      const cleanData = JSON.parse(JSON.stringify(data));
-
-      // Requires table: create table wishes (id uuid default uuid_generate_v4() primary key, data jsonb);
-      const { data: result, error } = await supabase
-        .from('wishes')
-        .insert([
-            { data: cleanData }
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return result.id;
-
-  } catch (e: any) {
-    console.error("Supabase Save Error:", e);
-    throw e;
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
   }
+  return '';
 };
 
-export const getWishFromCloud = async (id: string) => {
+const supabaseUrl =
+  getEnvVar('VITE_SUPABASE_URL') ||
+  getEnvVar('REACT_APP_SUPABASE_URL') ||
+  getEnvVar('SUPABASE_URL');
+
+const supabaseKey =
+  getEnvVar('VITE_SUPABASE_KEY') ||
+  getEnvVar('REACT_APP_SUPABASE_KEY') ||
+  getEnvVar('SUPABASE_KEY');
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// --- SAVE ---
+export const saveWishToCloud = async (data: any) => {
   if (!supabaseUrl || !supabaseKey) {
-      console.error("Configuration Error: Missing Supabase Environment Variables.");
-      return null;
+    throw new Error("Missing Supabase env variables");
   }
 
-  try {
-    const { data, error } = await supabase
-        .from('wishes')
-        .select('data')
-        .eq('id', id)
-        .single();
+  const cleanData = JSON.parse(JSON.stringify(data));
 
-    if (error) {
-        console.warn("Supabase Fetch Error (Check ID or Table Permissions):", error.message);
-        return null;
-    }
-    
-    return data?.data || null;
+  const { data: result, error } = await supabase
+    .from('wishes')
+    .insert([{ data: cleanData }])
+    .select('id')
+    .single();
 
-  } catch (e) {
-    console.error("Error fetching wish:", e);
-    return null;
-  }
+  if (error) throw error;
+
+  return result.id;
+};
+
+// --- LOAD ---
+export const getWishFromCloud = async (id: string) => {
+  const { data, error } = await supabase
+    .from('wishes')
+    .select('data')
+    .eq('id', id)
+    .single();
+
+  if (error) return null;
+  return data?.data ?? null;
 };

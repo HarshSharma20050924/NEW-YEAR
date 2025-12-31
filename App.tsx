@@ -9,6 +9,65 @@ import { WishData } from './types';
 import { saveWishToCloud, getWishFromCloud } from './firebase'; 
 import { Upload, Music, Image as ImageIcon, Sparkles, Plus, Trash2, Check, CloudUpload, Loader2, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 
+// --- IMAGE COMPRESSION UTILITY ---
+const compressImage = (file: File, isDecoration: boolean = false): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+             resolve(event.target?.result as string);
+             return;
+        }
+
+        // Limit dimensions to 1200px to ensure reasonable payload size for Supabase JSONB
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw image
+        ctx.drawImage(img, 0, 0, width, height);
+
+        if (!isDecoration) {
+            // For non-decorations (backgrounds, photos), use JPEG 0.8 for efficiency
+            // Handle transparency by filling white background (destination-over draws behind existing content)
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0,0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+        } else {
+            // For decorations, preserve PNG transparency
+            resolve(canvas.toDataURL('image/png'));
+        }
+      };
+      // Fallback on error
+      img.onerror = () => resolve(event.target?.result as string);
+    };
+    reader.onerror = () => resolve("");
+  });
+};
+
 export default function App() {
   const [hasEntered, setHasEntered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -117,32 +176,33 @@ export default function App() {
       }
   };
 
-  const handleFileUpload = (field: keyof WishData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (field: keyof WishData) => async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // Direct assignment without compression to preserve transparency and quality
-        setWishData(prev => ({ ...prev, [field]: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      // Decoration requires transparency (PNG), others can be compressed to JPEG
+      const isDecoration = field === 'decorationUrl';
+      const compressed = await compressImage(file, isDecoration);
+      setWishData(prev => ({ ...prev, [field]: compressed }));
     }
   };
 
-  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-       Array.from(files).forEach(file => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-              // Direct assignment without compression
-              setWishData(prev => ({
-                  ...prev,
-                  galleryImages: [...prev.galleryImages, reader.result as string]
-              }));
-          };
-          reader.readAsDataURL(file);
-       });
+       // Convert FileList to Array and process
+       const fileArray = Array.from(files);
+       const compressedImages: string[] = [];
+
+       for (const file of fileArray) {
+           // Gallery images generally don't need transparency, force JPEG for size
+           const result = await compressImage(file, false);
+           compressedImages.push(result);
+       }
+       
+       setWishData(prev => ({
+           ...prev,
+           galleryImages: [...prev.galleryImages, ...compressedImages]
+       }));
     }
   };
 
