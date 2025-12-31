@@ -566,7 +566,7 @@ export default function App() {
                     transition={{ duration: 2, delay: 1.5 }}
                     className="font-heading text-sm sm:text-xl lg:text-2xl text-vintage-gold uppercase text-center"
                 >
-                    The Golden Chapter
+                    Happy New Year
                 </motion.p>
             </div>
 
